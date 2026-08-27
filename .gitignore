@@ -1,0 +1,101 @@
+#################################
+# macOS
+#################################
+.DS_Store
+.AppleDouble
+.LSOverride
+
+#################################
+# Xcode
+#################################
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# The Xcode project build products and temp files
+build/
+DerivedData/
+
+# SwiftUI Previews cache
+*.preview-thumbnails
+*.preview-thumbnails/*
+
+#################################
+# Swift Package Manager
+#################################
+.swiftpm/
+Packages/
+# Package.resolved is intentionally tracked - it pins resolved versions.
+# The global ignore file (~/.config/git/ignore) excludes it, so negate here.
+!Package.resolved
+
+# SPM build artifacts
+.build/
+
+#################################
+# CocoaPods (if ever used)
+#################################
+Pods/
+Podfile.lock
+
+#################################
+# Carthage (unlikely, but safe)
+#################################
+Carthage/
+Carthage/Build/
+
+#################################
+# Fastlane (if used later)
+#################################
+fastlane/screenshots
+fastlane/test_output
+
+#################################
+# Generated Files
+#################################
+Generated/
+*.generated.swift
+
+#################################
+# User Workspace State
+#################################
+# The global ignore file (~/.config/git/ignore) has a blanket *.xcworkspace
+# rule. Keep the workspace nested inside .xcodeproj tracked - it carries
+# contents.xcworkspacedata and xcshareddata/swiftpm/.
+!**/*.xcodeproj/project.xcworkspace/
+**/*.xcworkspace/xcuserdata/
+**/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+#################################
+# Misc
+#################################
+*.moved-aside
+*.swp
+*.swo
+*.tmp
+*~.DS_Store
+__MACOSX
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+profile
+*.moved-aside
+DerivedData
+.idea/
+Crashlytics.sh
+generatechangelog.sh
+Pods/
+Carthage
+Provisioning
+Crashlytics.sh
+Sharing.h
+Tests/Private
+Design/Icon
+Build/
+MockServer/

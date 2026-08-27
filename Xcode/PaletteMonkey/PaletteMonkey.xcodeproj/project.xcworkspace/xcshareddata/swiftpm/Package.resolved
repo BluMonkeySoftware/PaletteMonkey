@@ -1,0 +1,24 @@
+{
+  "originHash" : "bde90e8f397f594ae6e46c2c62082bf3497d621453261e86fc26dd1787673c03",
+  "pins" : [
+    {
+      "identity" : "bmdeveloperkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/BluMonkeySoftware/BMDeveloperKit",
+      "state" : {
+        "revision" : "d635e957ca8249aeb6c25f811c4a5eb58f917a6a",
+        "version" : "0.1.0"
+      }
+    },
+    {
+      "identity" : "bmstandardlib",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/BluMonkeySoftware/BMStandardLib",
+      "state" : {
+        "revision" : "3a6626e0edeef231012997a2a17622bd03e00fdb",
+        "version" : "1.1.1"
+      }
+    }
+  ],
+  "version" : 3
+}
