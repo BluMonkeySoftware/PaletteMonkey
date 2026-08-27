@@ -13,15 +13,18 @@ The repo is git-initialized on branch `main`.
 
 The Xcode project lives at `Xcode/PaletteMonkey/`, not the repo root. Source is under
 `Xcode/PaletteMonkey/PaletteMonkey/`, split into `Application/` (the `@main` entry point),
-`Screens/`, and `Resources/` (asset catalog).
+`Screens/`, and `Resources/` (asset catalog). Test sources sit alongside in
+`Xcode/PaletteMonkey/PaletteMonkeyTests/`.
 
 The top-level `Assets/`, `Archive/`, `Design/`, `Docs/`, and `Notes/` directories are empty
 and sit outside the Xcode project — they are not compiled.
 
 ## Build and run
 
-All `xcodebuild` commands must run from `Xcode/PaletteMonkey/`. There is a single scheme and
-target, `PaletteMonkey`, and **no test target** — `xcodebuild test` will fail until one is added.
+All `xcodebuild` commands must run from `Xcode/PaletteMonkey/`. One shared scheme,
+`PaletteMonkey`, covers both targets: the app and `PaletteMonkeyTests`. The scheme is committed
+under `PaletteMonkey.xcodeproj/xcshareddata/xcschemes/` so a fresh clone and CI pick it up —
+do not rely on Xcode auto-generating one into `xcuserdata/`, which is ignored.
 
 `SDKROOT = auto` with several supported platforms means a `-destination` is effectively
 required; without one, xcodebuild picks a platform you probably did not intend.
@@ -37,6 +40,26 @@ xcodebuild -scheme PaletteMonkey -destination 'platform=macOS' build
 `xcodebuild -scheme PaletteMonkey -showdestinations` lists what is currently valid, and its
 "incompatible" section explains each rejection — useful because most destinations on this Mac
 are rejected (see below).
+
+## Tests
+
+`PaletteMonkeyTests` is an app-hosted unit test bundle using **Swift Testing** (`import Testing`,
+`@Suite` / `@Test`), not XCTest. Sources live in `Xcode/PaletteMonkey/PaletteMonkeyTests/`.
+
+```bash
+xcodebuild -scheme PaletteMonkey -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M5),OS=27.0' test
+```
+
+Run a single suite or test with `-only-testing`:
+
+```bash
+xcodebuild -scheme PaletteMonkey -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M5),OS=27.0' test -only-testing:PaletteMonkeyTests/HomeScreenRootTests
+```
+
+**Do not trust `Executed 0 tests, with 0 failures`** in the output. That line is the XCTest
+harness reporting that it found no *XCTest* cases, which is always true here. Swift Testing
+reports separately, with `◇` / `✔` markers and a final `Test run with N tests ... passed`.
+Grep for that, or for `✔`/`✘`, when checking results programmatically.
 
 ## Platform constraints that bite
 
