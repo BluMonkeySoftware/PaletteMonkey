@@ -94,7 +94,7 @@
 				76C165333040F2D700DC1D5C /* BMStandardLib */,
 				76C165363040F2E600DC1D5C /* BMDeveloperKit */,
 			);
-			productName = MyApp;
+			productName = PaletteMonkey;
 			productReference = 000000000000000000000120 /* PaletteMonkey.app */;
 			productType = "com.apple.product-type.application";
 		};
