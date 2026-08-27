@@ -1,101 +1,62 @@
 #################################
+# PaletteMonkey
+#
+# Standalone: this file does not depend on any global ignore file, so a
+# fresh clone on any machine ignores the right things.
+#################################
+
+#################################
 # macOS
 #################################
 .DS_Store
 .AppleDouble
 .LSOverride
+__MACOSX
 
 #################################
-# Xcode
+# Xcode - user state
 #################################
 xcuserdata/
 *.xccheckout
 *.xcscmblueprint
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
 
-# The Xcode project build products and temp files
-build/
-DerivedData/
-
-# SwiftUI Previews cache
-*.preview-thumbnails
-*.preview-thumbnails/*
-
-#################################
-# Swift Package Manager
-#################################
-.swiftpm/
-Packages/
-# Package.resolved is intentionally tracked - it pins resolved versions.
-# The global ignore file (~/.config/git/ignore) excludes it, so negate here.
-!Package.resolved
-
-# SPM build artifacts
-.build/
-
-#################################
-# CocoaPods (if ever used)
-#################################
-Pods/
-Podfile.lock
-
-#################################
-# Carthage (unlikely, but safe)
-#################################
-Carthage/
-Carthage/Build/
-
-#################################
-# Fastlane (if used later)
-#################################
-fastlane/screenshots
-fastlane/test_output
-
-#################################
-# Generated Files
-#################################
-Generated/
-*.generated.swift
-
-#################################
-# User Workspace State
-#################################
-# The global ignore file (~/.config/git/ignore) has a blanket *.xcworkspace
-# rule. Keep the workspace nested inside .xcodeproj tracked - it carries
-# contents.xcworkspacedata and xcshareddata/swiftpm/.
-!**/*.xcodeproj/project.xcworkspace/
+# Workspace *state* only. project.xcworkspace itself is tracked - it carries
+# contents.xcworkspacedata and xcshareddata/swiftpm/Package.resolved.
 **/*.xcworkspace/xcuserdata/
 **/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 
 #################################
-# Misc
+# Build products
 #################################
-*.moved-aside
+DerivedData/
+*.preview-thumbnails/
+.build/
+.swiftpm/
+
+# xcodebuild can emit a build/ alongside the project. Anchored on purpose:
+# a bare "build/" would also swallow any source directory of that name.
+Xcode/PaletteMonkey/build/
+
+#################################
+# Editor
+#################################
 *.swp
 *.swo
 *.tmp
-*~.DS_Store
-__MACOSX
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata/
-profile
-*.moved-aside
-DerivedData
 .idea/
-Crashlytics.sh
-generatechangelog.sh
-Pods/
-Carthage
-Provisioning
-Crashlytics.sh
-Sharing.h
-Tests/Private
-Design/Icon
-Build/
-MockServer/
+**/.claude/settings.local.json
+
+#################################
+# Tracked on purpose
+#
+# Lockfiles pin exact dependency versions and must be committed so every
+# machine and CI resolve identically. These negations are defensive: they
+# override a stale global ignore file on someone else's machine.
+#################################
+!Package.resolved
+!Podfile.lock
