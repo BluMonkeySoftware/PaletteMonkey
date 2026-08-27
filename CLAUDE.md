@@ -88,6 +88,12 @@ Requires Xcode 27 (`objectVersion = 90`); this machine builds with `/Application
 - Swift language mode 5.0, with `MEMBER_IMPORT_VISIBILITY` upcoming feature on: an extension's
   members need their defining module imported directly, not transitively.
 - App Sandbox is on (`ENABLE_APP_SANDBOX`), with user-selected files read-only.
+- **`ENABLE_USER_SCRIPT_SANDBOXING = YES`** project-wide. Any run-script phase that reads
+  outside the build directory fails with `Operation not permitted` — the sandbox denies `exec`
+  on the script itself, before it runs a single line, and declaring `inputPaths` does not help
+  because reading `.git` is blocked too. `Scripts/set_build_number.sh` (stamps `CFBundleVersion`
+  from `git rev-list HEAD --count`) needs this setting off for the app target. Verify whether
+  the phase is wired before assuming either state.
 - Localization uses String Catalogs with generated symbols; no `Info.plist` file exists —
   it is generated from `INFOPLIST_KEY_*` build settings.
 - Source files carry a banner comment header (rule-line separators, author, copyright) and
