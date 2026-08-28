@@ -34,100 +34,58 @@ struct ExportSheet: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Rule()
-            tabs
-            Rule()
-
-            ScrollView([.horizontal, .vertical]) {
-                Text(code)
-                    .font(Theme.mono(12))
-                    .foregroundStyle(Theme.text)
-                    .lineSpacing(4)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 22)
-                    .padding(.vertical, 20)
-            }
-            .background(Theme.neutral100)
-
-            Rule()
-            footer
-        }
-        .background(Theme.bg)
-        .frame(minWidth: 520, minHeight: 420)
-    }
-
-
-    // MARK: -
-    // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
-    private var header: some View {
-        HStack(alignment: .top, spacing: Theme.space4) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Export").kicker(Theme.accent700)
-                Text("\(palette.name) → Xcode")
-                    .font(Theme.heading(24))
-                    .tracking(-0.48)
-                    .foregroundStyle(Theme.text)
-            }
-            Spacer(minLength: 0)
-            Button("Close") { dismiss() }
-                .buttonStyle(.plain)
-                .controlLabel(Theme.accent)
-                .frame(minHeight: Theme.minTarget)
-        }
-        .padding(.horizontal, 22)
-        .padding(.vertical, 20)
-    }
-
-    private var tabs: some View {
-        HStack(spacing: 0) {
-            ForEach(ExportFormat.allCases) { option in
-                Button {
-                    format = option
-                    copied = false
-                } label: {
-                    Text(option.label)
-                        .font(Theme.body(11, .bold))
-                        .tracking(0.88)
-                        .textCase(.uppercase)
-                        .foregroundStyle(option == format ? Theme.bg : Theme.text)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(option == format ? Theme.text : Color.clear)
-                        .contentShape(Rectangle())
+        NavigationStack {
+            VStack(spacing: 0) {
+                Picker("Format", selection: $format) {
+                    ForEach(ExportFormat.allCases) { option in
+                        Text(option.label).tag(option)
+                    }
                 }
-                .buttonStyle(.plain)
-                .overlay(alignment: .trailing) { Rule(axis: .vertical) }
+                .pickerStyle(.segmented)
+                .padding()
+                .onChange(of: format) { copied = false }
+
+                Divider()
+
+                ScrollView([.horizontal, .vertical]) {
+                    Text(code)
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                }
+                .background(.quaternary.opacity(0.4))
+
+                Divider()
+
+                HStack {
+                    Text("Dark-mode variants export as the \u{201C}any/dark\u{201D} appearance pair.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Spacer(minLength: 12)
+
+                    Button(copied ? "Copied" : "Copy",
+                           systemImage: copied ? "checkmark" : "doc.on.doc") {
+                        copy(code)
+                        copied = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+            }
+            .navigationTitle("\(palette.name) → Xcode")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
             }
         }
-    }
-
-    private var footer: some View {
-        HStack(spacing: 14) {
-            Text("Writes into the app's iCloud container, then hands a generated Swift file and asset catalog to Xcode. Dark-mode variants export as the \u{201C}any/dark\u{201D} appearance pair.")
-                .font(Theme.body(11))
-                .foregroundStyle(Theme.neutral600)
-                .lineSpacing(3)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Button {
-                copy(code)
-                copied = true
-            } label: {
-                Text(copied ? "Copied" : "Copy")
-                    .controlLabel(Theme.bg)
-                    .padding(.horizontal, Theme.space4)
-                    .frame(minHeight: Theme.minTarget)
-                    .background(Theme.accent)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 22)
-        .padding(.vertical, Theme.space4)
+        .frame(minWidth: 520, minHeight: 420)
     }
 
 

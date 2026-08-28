@@ -13,8 +13,8 @@ The repo is git-initialized on branch `main`.
 
 The Xcode project lives at `Xcode/PaletteMonkey/`, not the repo root. Source is under
 `Xcode/PaletteMonkey/PaletteMonkey/`, split into `Application/` (the `@main` entry point),
-`Screens/`, and `Resources/` (asset catalog), plus `ColorKit/`, `Model/`, `Export/`, and
-`Design/`. Test sources sit alongside in `Xcode/PaletteMonkey/PaletteMonkeyTests/`.
+`Screens/`, and `Resources/` (asset catalog), plus `ColorKit/`, `Model/`, and `Export/`.
+Test sources sit alongside in `Xcode/PaletteMonkey/PaletteMonkeyTests/`.
 
 The top-level `Assets/`, `Archive/`, `Design/`, `Docs/`, and `Notes/` directories are empty
 and sit outside the Xcode project — they are not compiled.
@@ -94,13 +94,17 @@ The UI implements `PaletteMonkey.dc.html` from the Claude Design project
 intended architecture — read both before changing layout or colour behaviour, since the
 prototype is the visual contract.
 
-Two deliberate departures from the prototype, both documented in code:
+**The prototype's visual style is deliberately not implemented.** It uses the Modernist
+design system — flat, zero-radius, 2pt rules, Archivo, uppercase micro-labels. That was built
+and then removed: the app uses stock SwiftUI instead (`Form`/`List`, `LabeledContent`,
+`Picker(.segmented)`, `ColorPicker`, system fonts, the system accent). Treat the prototype as
+the spec for **structure and behaviour**, not for appearance — do not reintroduce a custom
+theme layer without asking.
 
-- The design system specifies **Archivo**, which is not a system face. `Theme` maps headings
-  onto the system face at matching weights rather than bundling a webfont.
-- The prototype **fakes** eyedropper and camera sampling by nudging the current colour. The
-  real eyedropper (`NSColorSampler`) is wired on macOS; the iPadOS camera sampler is a
-  disabled control rather than a fake, because faking a capture would be a lie in a shipping UI.
+The other departure: the prototype **fakes** eyedropper and camera sampling by nudging the
+current colour. The real eyedropper (`NSColorSampler`) is wired on macOS; the iPadOS camera
+sampler is a disabled control rather than a fake, because faking a capture would be a lie in
+a shipping UI.
 
 ## Platform constraints that bite
 

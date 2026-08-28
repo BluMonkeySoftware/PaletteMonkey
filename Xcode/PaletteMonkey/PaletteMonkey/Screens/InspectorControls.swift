@@ -14,88 +14,11 @@ import SwiftUI
 // MARK: -
 // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-/// A titled block with the system's 2pt rule beneath it. Every inspector
-/// section is one of these, which is what gives the column its even rhythm.
-struct InspectorSection<Content: View>: View {
-
-    var title: String?
-    var padding: CGFloat = Theme.space4
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if let title {
-                Text(title).kicker().padding(.bottom, Theme.space2 + 2)
-            }
-            content
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(padding)
-        .overlay(alignment: .bottom) { Rule() }
-    }
-}
-
-
-// MARK: -
-// ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
-/// The system's flat field: a 2pt border, no radius, surface fill.
-struct ModernistFieldStyle: TextFieldStyle {
-
-    func _body(configuration: TextField<Self._Label>) -> some View {
-        configuration
-            .textFieldStyle(.plain)
-            .padding(.horizontal, 10)
-            .padding(.vertical, Theme.space2)
-            .background(Theme.surface)
-            .overlay { Rectangle().strokeBorder(Theme.divider, lineWidth: Theme.rule) }
-    }
-}
-
-extension TextFieldStyle where Self == ModernistFieldStyle {
-    static var modernist: ModernistFieldStyle { ModernistFieldStyle() }
-}
-
-
-// MARK: -
-// ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
-/// A joined row of segments with shared 2pt borders — the design's segmented
-/// control, which is squared off rather than the system's rounded one.
-struct SegmentedRow<Item: Hashable>: View {
-
-    var items: [Item]
-    var label: (Item) -> String
-    var isOn: (Item) -> Bool
-    var action: (Item) -> Void
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                Button {
-                    action(item)
-                } label: {
-                    Text(label(item))
-                        .font(Theme.body(11, .bold))
-                        .tracking(0.66)
-                        .foregroundStyle(isOn(item) ? Theme.bg : Theme.text)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 9)
-                        .background(isOn(item) ? Theme.text : Theme.neutral100)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .overlay { Rectangle().strokeBorder(Theme.divider, lineWidth: Theme.rule) }
-            }
-        }
-    }
-}
-
-
-// MARK: -
-// ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
 /// A wrapping set of toggle chips, used for tags and harmony modes.
+///
+/// Selection is carried by the standard bordered / bordered-prominent button
+/// styles, so the chips pick up the app's accent colour and the platform's own
+/// pressed and disabled treatments.
 struct ChipToggleRow<Item: Hashable>: View {
 
     var items: [Item]
@@ -106,21 +29,28 @@ struct ChipToggleRow<Item: Hashable>: View {
     var body: some View {
         FlowLayout(spacing: 6) {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                Button {
-                    action(item)
-                } label: {
-                    Text(label(item))
-                        .font(Theme.body(10, .bold))
-                        .tracking(0.8)
-                        .textCase(.uppercase)
-                        .foregroundStyle(isOn(item) ? Theme.bg : Theme.text)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, Theme.space2)
-                        .background(isOn(item) ? Theme.text : Theme.neutral100)
-                        .overlay { Rectangle().strokeBorder(Theme.divider, lineWidth: Theme.rule) }
-                }
-                .buttonStyle(.plain)
+                chip(item)
             }
+        }
+    }
+
+    /// Branching on the style rather than type-erasing it: `.buttonStyle` is
+    /// generic, so the two cases cannot be selected with a ternary.
+    @ViewBuilder
+    private func chip(_ item: Item) -> some View {
+        let title = label(item)
+
+        if isOn(item) {
+            Button(title) { action(item) }
+                .font(.caption)
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+        } else {
+            Button(title) { action(item) }
+                .font(.caption)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .tint(.secondary)
         }
     }
 }
@@ -129,8 +59,8 @@ struct ChipToggleRow<Item: Hashable>: View {
 // MARK: -
 // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-/// Wrapping row layout — the equivalent of the prototype's `flex-wrap`, which
-/// `HStack` has no direct analogue for.
+/// Wrapping row layout — the equivalent of CSS `flex-wrap`, which `HStack` has
+/// no direct analogue for.
 struct FlowLayout: Layout {
 
     var spacing: CGFloat = 6
@@ -175,10 +105,7 @@ struct FlowLayout: Layout {
 
             if needed > width, !current.indices.isEmpty {
                 rows.append(current)
-                current = Row()
-                current.indices = [index]
-                current.width = size.width
-                current.height = size.height
+                current = Row(indices: [index], width: size.width, height: size.height)
             } else {
                 current.indices.append(index)
                 current.width = needed
@@ -190,3 +117,48 @@ struct FlowLayout: Layout {
         return rows
     }
 }
+
+
+// MARK: -
+// ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+/// A colour well with the system's rounded-rectangle shape.
+struct SwatchWell: View {
+
+    var hsb: HSB
+    var size: CGFloat? = nil
+    var cornerRadius: CGFloat = 6
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(hsb.color)
+            .frame(width: size, height: size)
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(.separator, lineWidth: 0.5)
+            }
+    }
+}
+
+
+// MARK: -
+// ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+/// The swatch's 60 · 30 · 10 role, as a standard tag.
+struct RoleBadge: View {
+
+    var role: SwatchRole?
+
+    var body: some View {
+        Text(role?.label ?? "Unassigned")
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(role == nil ? .secondary : Color.accentColor)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(
+                Capsule().fill(role == nil ? AnyShapeStyle(.quaternary)
+                                           : AnyShapeStyle(Color.accentColor.opacity(0.15)))
+            )
+    }
+}
+

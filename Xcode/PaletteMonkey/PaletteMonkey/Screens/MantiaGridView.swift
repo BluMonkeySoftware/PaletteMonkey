@@ -32,88 +32,67 @@ struct MantiaGridView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 24) {
 
-                Text("Mantia transform").kicker(Theme.accent700)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Hue every \(number(lattice.hueStep))°, saturation and brightness in \(lattice.steps)ths")
+                        .font(.title2.bold())
 
-                Text("Hue every \(number(lattice.hueStep))°, saturation and brightness in \(lattice.steps)ths")
-                    .font(Theme.heading(34))
-                    .tracking(-1.02)
-                    .foregroundStyle(Theme.text)
-                    .padding(.top, Theme.space2)
-                    .padding(.bottom, 6)
-
-                Text("The Louie Mantia transform quantises a color to a fixed lattice: \(lattice.hueStopCount) hue stops around the wheel, and \(lattice.steps) even steps of saturation and brightness. Pick a hue below, then a cell, and the selected swatch takes that value.")
-                    .font(Theme.body(13))
-                    .foregroundStyle(Theme.neutral700)
-                    .lineSpacing(4)
-                    .frame(maxWidth: 700, alignment: .leading)
-
-                Rule().padding(.top, 22).padding(.bottom, Theme.space4)
-
-                Text("Hue stops · every \(number(lattice.hueStep))°").kicker()
-                    .padding(.bottom, Theme.space2)
-
-                hueRail
-
-                HStack(alignment: .firstTextBaseline, spacing: 14) {
-                    Text("Saturation × brightness · ⅛ of 100%").kicker()
-                    Text("hue \(number(activeHue))°")
-                        .tabularFigures(11)
-                        .foregroundStyle(Theme.neutral600)
+                    Text("The Louie Mantia transform quantises a color to a fixed lattice: \(lattice.hueStopCount) hue stops around the wheel, and \(lattice.steps) even steps of saturation and brightness. Pick a hue below, then a cell, and the selected swatch takes that value.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: 700, alignment: .leading)
                 }
-                .padding(.top, Theme.space6)
-                .padding(.bottom, Theme.space2)
 
-                grid
+                section("Hue stops · every \(number(lattice.hueStep))°") { hueRail }
+
+                section("Saturation × brightness · hue \(number(activeHue))°") {
+                    grid.frame(maxWidth: 560, alignment: .leading)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(Theme.space8)
+            .padding()
         }
-        .background(Theme.bg)
     }
 
 
     // MARK: -
     // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
+    private func section<Content: View>(_ title: String,
+                                        @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+            content()
+        }
+    }
+
     private var hueRail: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 24), spacing: 2) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 3), count: 24), spacing: 3) {
             ForEach(lattice.hueStops, id: \.self) { stop in
                 let value = HSB(hue: stop, saturation: 0.90, brightness: 0.95)
-                Button {
-                    mantiaHue = stop
-                } label: {
-                    Rectangle()
+                Button { mantiaHue = stop } label: {
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(value.color)
-                        .frame(height: 22)
-                        .overlay {
-                            if stop == activeHue {
-                                Rectangle().strokeBorder(Theme.text, lineWidth: 3)
-                            }
-                        }
+                        .frame(height: 24)
+                        .overlay { selectionRing(isOn: stop == activeHue, cornerRadius: 4) }
                 }
                 .buttonStyle(.plain)
                 .help("\(number(stop))°")
             }
         }
-        .padding(2)
-        .overlay { Rectangle().strokeBorder(Theme.divider, lineWidth: Theme.rule) }
     }
 
     private var grid: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 3) {
             ForEach(0 ..< lattice.steps, id: \.self) { row in
-                HStack(spacing: 2) {
+                HStack(spacing: 3) {
                     ForEach(0 ..< lattice.steps, id: \.self) { column in
                         cell(row: row, column: column)
                     }
                 }
             }
         }
-        .padding(2)
-        .overlay { Rectangle().strokeBorder(Theme.divider, lineWidth: Theme.rule) }
-        .frame(maxWidth: 560, alignment: .leading)
     }
 
     private func cell(row: Int, column: Int) -> some View {
@@ -123,20 +102,24 @@ struct MantiaGridView: View {
                         brightness: 1 - Double(row) * inc)
         let isCurrent = selected.map { value.isApproximately($0.hsb) } ?? false
 
-        return Button {
-            onPick(value)
-        } label: {
-            Rectangle()
+        return Button { onPick(value) } label: {
+            RoundedRectangle(cornerRadius: 6)
                 .fill(value.color)
                 .aspectRatio(1, contentMode: .fit)
-                .overlay {
-                    if isCurrent {
-                        Rectangle().strokeBorder(Theme.text, lineWidth: 3)
-                    }
-                }
+                .overlay { selectionRing(isOn: isCurrent, cornerRadius: 6) }
         }
         .buttonStyle(.plain)
         .help("\(value.hexDisplay) · s\(Int((value.saturation * 100).rounded())) b\(Int((value.brightness * 100).rounded()))")
+    }
+
+    /// Drawn in the accent colour rather than ink, so it stays visible on both
+    /// dark and light cells.
+    @ViewBuilder
+    private func selectionRing(isOn: Bool, cornerRadius: CGFloat) -> some View {
+        if isOn {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .strokeBorder(Color.accentColor, lineWidth: 3)
+        }
     }
 
     private func number(_ v: Double) -> String {

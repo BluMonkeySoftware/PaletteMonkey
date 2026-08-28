@@ -69,7 +69,6 @@ struct HomeScreenRoot: View {
                 .toolbar { toolbar }
                 .safeAreaInset(edge: .bottom, spacing: 0) { footer }
         }
-        .tint(Theme.accent)
         .sheet(isPresented: $showExport) {
             if let palette = selectedPalette {
                 ExportSheet(palette: palette, lattice: lattice)
@@ -162,20 +161,18 @@ struct HomeScreenRoot: View {
     }
 
     private var footer: some View {
-        VStack(spacing: 0) {
-            Rule()
-            HStack(spacing: 14) {
-                Text("iCloud").controlLabel(Theme.accent700)
-                Text(syncStatus).controlLabel(Theme.neutral600)
-                Spacer(minLength: Theme.space4)
-                Text("Hue step \(Int(lattice.hueStep))° · \(lattice.steps) S/B steps · ⌘E exports")
-                    .controlLabel(Theme.neutral600)
-            }
-            .lineLimit(1)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 10)
-            .background(Theme.bg)
+        HStack {
+            Label(syncStatus, systemImage: "icloud")
+            Spacer(minLength: 16)
+            Text("Hue step \(Int(lattice.hueStep))° · \(lattice.steps) S/B steps · ⌘E exports")
         }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .background(.bar)
     }
 
 
