@@ -75,7 +75,7 @@ struct MantiaGridView: View {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(value.color)
                         .frame(height: 24)
-                        .overlay { selectionRing(isOn: stop == activeHue, cornerRadius: 4) }
+                        .overlay { selectionRing(isOn: stop == activeHue, on: value, cornerRadius: 4) }
                 }
                 .buttonStyle(.plain)
                 .help("\(number(stop))°")
@@ -106,19 +106,23 @@ struct MantiaGridView: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(value.color)
                 .aspectRatio(1, contentMode: .fit)
-                .overlay { selectionRing(isOn: isCurrent, cornerRadius: 6) }
+                .overlay { selectionRing(isOn: isCurrent, on: value, cornerRadius: 6) }
         }
         .buttonStyle(.plain)
         .help("\(value.hexDisplay) · s\(Int((value.saturation * 100).rounded())) b\(Int((value.brightness * 100).rounded()))")
     }
 
-    /// Drawn in the accent colour rather than ink, so it stays visible on both
-    /// dark and light cells.
+    /// Drawn in the cell's own contrasting ink.
+    ///
+    /// The accent colour is blue, which made the ring invisible on precisely
+    /// the blue stops — and hue 210° is blue, so the default selection could
+    /// not be seen at all. Ink is picked per cell by contrast ratio, so the
+    /// ring reads on every hue.
     @ViewBuilder
-    private func selectionRing(isOn: Bool, cornerRadius: CGFloat) -> some View {
+    private func selectionRing(isOn: Bool, on value: HSB, cornerRadius: CGFloat) -> some View {
         if isOn {
             RoundedRectangle(cornerRadius: cornerRadius)
-                .strokeBorder(Color.accentColor, lineWidth: 3)
+                .strokeBorder(value.ink.color, lineWidth: 3)
         }
     }
 
