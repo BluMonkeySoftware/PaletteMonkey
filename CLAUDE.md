@@ -13,8 +13,8 @@ The repo is git-initialized on branch `main`.
 
 The Xcode project lives at `Xcode/PaletteMonkey/`, not the repo root. Source is under
 `Xcode/PaletteMonkey/PaletteMonkey/`, split into `Application/` (the `@main` entry point),
-`Screens/`, and `Resources/` (asset catalog). Test sources sit alongside in
-`Xcode/PaletteMonkey/PaletteMonkeyTests/`.
+`Screens/`, and `Resources/` (asset catalog), plus `ColorKit/`, `Model/`, `Export/`, and
+`Design/`. Test sources sit alongside in `Xcode/PaletteMonkey/PaletteMonkeyTests/`.
 
 The top-level `Assets/`, `Archive/`, `Design/`, `Docs/`, and `Notes/` directories are empty
 and sit outside the Xcode project — they are not compiled.
@@ -60,6 +60,47 @@ xcodebuild -scheme PaletteMonkey -destination 'platform=iOS Simulator,name=iPad 
 harness reporting that it found no *XCTest* cases, which is always true here. Swift Testing
 reports separately, with `◇` / `✔` markers and a final `Test run with N tests ... passed`.
 Grep for that, or for `✔`/`✘`, when checking results programmatically.
+
+## App architecture
+
+PaletteMonkey is a palette editor: a sidebar of palettes, a detail view in one of three modes,
+and an inspector on the selected swatch. It implements a Claude Design prototype — see
+**Design provenance** below.
+
+- **`ColorKit/`** — pure value types, no SwiftUI state and no persistence. `HSB` is the
+  canonical colour type; `MantiaLattice`, `Harmony`, `PairCompletion`, and `DarkVariant` are
+  all functions over it. This layer carries the test suite.
+- **`Model/`** — SwiftData `@Model` classes plus `PaletteEditing.swift`, which holds every
+  mutation as a `ModelContext` extension so views stay presentation-only.
+- **`Export/`** — generates the three Xcode artefacts (a `Color` extension, a `.colorset`, a
+  tokens JSON) as strings.
+- **`Screens/`** — `HomeScreenRoot` owns all selection state and passes it down; no view
+  reaches into the model context except through `PaletteEditing`.
+
+**Colour is stored as HSB, never hex.** Every operation — lattice snapping, harmonies, dark
+derivation — is an HSB operation, and round-tripping through 8-bit hex loses lattice stops.
+`hexString` is a formatted view of the model. Anything that adds a colour path should keep
+that direction.
+
+The models are CloudKit-shaped (all properties defaulted, relationships optional, no
+`.unique`) but sync is **not** enabled — that needs an iCloud entitlement and provisioning.
+`PaletteMonkeyApp` documents the one-line change.
+
+## Design provenance
+
+The UI implements `PaletteMonkey.dc.html` from the Claude Design project
+`0a445559-0b00-416e-810c-f961b083b8be` ("PaletteMonkey SwiftUI prototype"), read via the
+`DesignSync` tool. That project also holds `SwiftUI Notes.dc.html`, which specifies the
+intended architecture — read both before changing layout or colour behaviour, since the
+prototype is the visual contract.
+
+Two deliberate departures from the prototype, both documented in code:
+
+- The design system specifies **Archivo**, which is not a system face. `Theme` maps headings
+  onto the system face at matching weights rather than bundling a webfont.
+- The prototype **fakes** eyedropper and camera sampling by nudging the current colour. The
+  real eyedropper (`NSColorSampler`) is wired on macOS; the iPadOS camera sampler is a
+  disabled control rather than a fake, because faking a capture would be a lie in a shipping UI.
 
 ## Platform constraints that bite
 

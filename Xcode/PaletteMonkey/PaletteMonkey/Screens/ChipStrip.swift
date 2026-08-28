@@ -1,6 +1,6 @@
 // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 //
-// PaletteMonkeyApp.swift
+// ChipStrip.swift
 //
 //
 // Created by Steven Marcotte on 2026-Aug-27
@@ -9,40 +9,30 @@
 // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 import SwiftUI
-import SwiftData
 
 
 // MARK: -
 // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-@main struct PaletteMonkeyApp: App {
+/// The palette-at-a-glance strip used in the sidebar and the harmony preview.
+struct ChipStrip: View {
 
-    /// Local-only for now.
-    ///
-    /// The models are already CloudKit-shaped — every property defaulted, every
-    /// relationship optional, no `.unique` attributes — so enabling sync is a
-    /// matter of adding the iCloud capability and an entitlement, then passing
-    /// `cloudKitDatabase: .private("iCloud.com.stevenmarcotte.experimental.PaletteMonkey")`
-    /// to the configuration below. That needs provisioning, so it is deliberately
-    /// not wired up here.
-    private let container: ModelContainer = {
-        let schema = Schema([Palette.self, Swatch.self])
-        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    var colors: [HSB]
+    var height: CGFloat = 26
+    var bordered: Bool = true
 
-        do {
-            return try ModelContainer(for: schema, configurations: configuration)
-        } catch {
-            // A corrupt or migration-blocked store should not take the app down
-            // silently; fall back to memory so the UI is still usable.
-            let fallback = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-            return try! ModelContainer(for: schema, configurations: fallback)
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(colors.enumerated()), id: \.offset) { _, value in
+                Rectangle()
+                    .fill(value.color)
+                    .overlay {
+                        if bordered {
+                            Rectangle().strokeBorder(Theme.neutral300, lineWidth: 1)
+                        }
+                    }
+            }
         }
-    }()
-
-    var body: some Scene {
-        WindowGroup {
-            HomeScreenRoot()
-        }
-        .modelContainer(container)
+        .frame(height: height)
     }
 }
