@@ -21,11 +21,6 @@ struct ChipsListView: View {
     var lattice: MantiaLattice
     @Binding var selection: PersistentIdentifier?
 
-    /// The width the readouts need before they are worth a column of their own.
-    /// Below it they fold under the name — the fallback fits at any width, so
-    /// the failure mode is a plainer row rather than a clipped one.
-    private static let wideLayoutThreshold: CGFloat = 560
-
     var body: some View {
         List(selection: $selection) {
             // The mode picker occupies the toolbar's principal slot, which is
@@ -43,24 +38,24 @@ struct ChipsListView: View {
     // MARK: -
     // ————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
+    /// One layout at every width, deliberately.
+    ///
+    /// The prototype puts the readouts in their own column, and a width-keyed
+    /// switch to reproduce that was tried twice and misfired both times: on a
+    /// portrait iPad the inspector presents as a floating *overlay* rather than
+    /// a column, so the detail view still measures its full width and the
+    /// readouts column lands underneath the panel — present in the layout,
+    /// invisible on screen. No width the row can observe distinguishes "wide"
+    /// from "wide but half-covered". Stacking always is correct at every size.
     private func row(_ swatch: Swatch) -> some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 16) {
-                SwatchWell(hsb: swatch.hsb, size: 56, cornerRadius: 8)
+        HStack(alignment: .top, spacing: 16) {
+            SwatchWell(hsb: swatch.hsb, size: 56, cornerRadius: 8)
+
+            VStack(alignment: .leading, spacing: 8) {
                 identity(swatch)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 readouts(swatch)
             }
-            .frame(minWidth: Self.wideLayoutThreshold)
-
-            HStack(alignment: .top, spacing: 16) {
-                SwatchWell(hsb: swatch.hsb, size: 56, cornerRadius: 8)
-                VStack(alignment: .leading, spacing: 8) {
-                    identity(swatch)
-                    readouts(swatch)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 6)
     }
